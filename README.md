@@ -1,5 +1,7 @@
-# LaTeXTransformer
-可之科技 Mathjax 临时版本
+
+# 可之科技 Mathjax 临时版本
+
+## 详情看源码
 
 index.html 引入 Mathjax 和 自定义Mathjax配置
 
