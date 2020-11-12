@@ -336,6 +336,8 @@ let transformer = function (value) {
       str = str.split(words[i]).join(words[i] + ' ');
     }
   }
+  str = str.split('<unk>').join('');
+
   str = str.split('\\left arrow').join('\\leftarrow' + ' ');
   str = str.split('\\left rightarrow').join('\\leftrightarrow' + ' ');
   str = str.split('\\right arrow').join('\\rightarrow' + ' ');
