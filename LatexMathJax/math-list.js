@@ -1,9 +1,4 @@
-<template>
-  <!-- for learnable -->
-  <span ref="mathJaxEl" class="latex-mathjax--span"></span>
-</template>
-<script>
-let words = [
+export default [
   '!',
   '"',
   '$',
@@ -328,62 +323,3 @@ let words = [
   '￠',
   '£'
 ]
-
-let transformer = function (value) {
-  var str = value;
-  for (var i in words) {
-    if (value.indexOf(words[i]) !== -1 && words[i].indexOf('\\') !== -1) {
-      str = str.split(words[i]).join(words[i] + ' ');
-    }
-  }
-  str = str.split('<unk>').join('');
-
-  str = str.split('\\left arrow').join('\\leftarrow' + ' ');
-  str = str.split('\\left rightarrow').join('\\leftrightarrow' + ' ');
-  str = str.split('\\right arrow').join('\\rightarrow' + ' ');
-  str = str.split('\\nsubset eq').join('\\nsubseteq' + ' ');
-  str = str.split('\\nsupset eq').join('\\nsupseteq' + ' ');
-  str = str.split('\\subset eq').join('\\subseteq' + ' ');
-  str = str.split('\\subset neq').join('\\subsetneq' + ' ');
-  str = str.split('\\triangle down').join('\\triangledown' + ' ');
-  return str
-}
-
-export default {
-  name: 'LatexMathjax', // string
-  props: {
-    content: {
-      type: String,
-      required: false,
-      default: function () {
-        return ''
-      }
-    }
-  }, // propsData
-  data() {
-    return {
-
-      regex: '/\\&/g'
-    }
-  },
-  computed: {
-    comContent() {
-      return transformer(this.content.replace(this.regex, '&').replace(/\\textcircled/g, '\\enclose{circle}'))
-    }
-  }, // { [key: string]: Function | { get: Function, set: Function } }
-  watch: {
-    comContent: {
-      handler: function (newValue, oldValue) {
-        this.$nextTick(() => {
-          this.$refs.mathJaxEl.textContent = ` $$${this.comContent}$$`
-          MathJax.typesetPromise([this.$refs.mathJaxEl])
-        })
-      },
-      immediate: true
-    }
-  }, // { [key: string]: string | Function | Object | Array }
-  methods: {}// { [key: string]: Function }
-}
-</script>
-<style lang="scss" scoped>
-</style>
