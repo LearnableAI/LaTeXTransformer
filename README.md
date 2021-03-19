@@ -15,5 +15,3 @@ import LatexMathJax from './LatexMathJax'
   }
 </script>
 ```
-
-统一了名称,优化了代码
