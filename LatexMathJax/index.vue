@@ -16,30 +16,47 @@ export default {
       default: function () {
         return ''
       }
+    },
+
+    isStandardRule: {
+      type: Boolean,
+      required: false,
+      default: function () {
+        return false
+      }
     }
   }, // propsData
   computed: {
-    comContent() {
+    comContent () {
       let content = this.content
       content = content.replace(/\\textcircled/g, '\\enclose{circle}')
-      content = content.replace(/<unk>/g, '')
+      content = content.replace(/<unk>/g, '').replace(/\\deletion/g, '')
+      content = content.trim()
+      if (!content) {
+        return ''
+      }
+
+      if (this.isStandardRule) {
+        return content
+      }
+
       return `$${(this.trans(window.__L_MathJax.mathList, 0, content))}$ `
     },
   }, // { [key: string]: Function | { get: Function, set: Function } }
   watch: {
     comContent: {
-      handler: function (newValue, oldValue) {
+      handler: function () {
         this.$nextTick(() => {
           this.$refs.mathJaxEl.textContent = this.comContent
           if (window.__L_MathJax.ready === false) {
             return
           }
           window.__L_MathJax.ready = false // readied
-          new Promise((resolve, reject) => {
+          new Promise((resolve) => {
             resolve()
           }).then(
             () => {
-              MathJax.typesetPromise(document.querySelectorAll('.latex-math-jax--span')).then(
+              window.MathJax.typesetPromise(document.querySelectorAll('.latex-math-jax--span')).then(
                 () => {
                   window.__L_MathJax.ready = true
                 }
@@ -51,10 +68,11 @@ export default {
       immediate: true
     },
   }, // { [key: string]: string | Function | Object | Array }
-  beforeCreate() {
+  beforeCreate () {
     if (window.__L_MathJax) {
       return
     }
+    // eslint-disable-next-line @typescript-eslint/camelcase
     window.__L_MathJax = {
       ready: false,
       inited: false,
@@ -65,11 +83,11 @@ export default {
         return item.indexOf('\\') > -1
       })
       .sort((a, b) => {
-        return b.length - a.length;
+        return b.length - a.length
       })
     window.__L_MathJax.mathList = newMathList
   },
-  created() {
+  created () {
     if (window.__L_MathJax && window.__L_MathJax.inited) {
       return
     }
@@ -78,12 +96,15 @@ export default {
     this.initScript()
   },
   methods: {
-    initMathJax() {
+    initMathJax () {
       window.MathJax = {
-        loader: { load: ['[tex]/enclose'] },
+        options: {
+          enableMenu: false
+        },
+        loader: { load: ['[tex]/enclose', '[tex]/noerrors'] }, // '[tex]/noerrors'
         startup: {
           pageReady: () => {
-            MathJax.typesetPromise(document.querySelectorAll('.latex-math-jax--span')).then(
+            window.MathJax.typesetPromise(document.querySelectorAll('.latex-math-jax--span')).then(
               () => {
                 window.__L_MathJax.ready = true
               }
@@ -92,18 +113,18 @@ export default {
         },
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
-          packages: { '[+]': ['enclose'] },
+          packages: { '[+]': ['enclose', 'noerrors'] },
           macros: MATH_JAX_TEX_MACROS
         }
       }
     },
-    initScript() {
+    initScript () {
       const s = document.createElement('script')
       s.type = 'text/javascript'
       s.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
       document.body.appendChild(s)
     },
-    trans(mathList, i, content) {
+    trans (mathList, i, content) {
       if (i === mathList.length) {
         return content
       }
@@ -111,13 +132,24 @@ export default {
       let newContentArr = content.split(mathList[i])
       let transList = newContentArr.map((item) => {
         return this.trans(mathList, i + 1, item)
-      });
+      })
       res = transList.join(mathList[i] + ' ')
-      return res;
+      return res
     }
   }// { [key: string]: Function }
 }
 
 </script>
 <style lang="scss" scoped>
+::v-deep .MJX-TEX {
+  display: inline-flex;
+  align-items:baseline;
+  flex-wrap: wrap;
+
+  .mjx-n{
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items:baseline;
+  }
+}
 </style>
